@@ -5,12 +5,16 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js"
   },
   "author": "rashmi",
   "license": "ISC",
   "devDependencies": {
     "nodemon": "^3.0.2",
     "prettier": "^3.1.1"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "mongoose": "^8.0.3"
   }
 }
