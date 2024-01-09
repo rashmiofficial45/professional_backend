@@ -11,8 +11,12 @@ dotenv.config({
 
 connectDB()
 .then(()=>{
+    app.get('/', (req, res) => {
+        res.send('Hello, this is the root!');
+      });
+      
     app.listen(process.env.PORT||8000 ,()=>{
-        console.log(`App is listening on PORT:${process.env.PORT}`);
+        console.log(`App is listening on PORT: http://localhost:${process.env.PORT}`);
     })
 })
 .catch ((err)=>{
