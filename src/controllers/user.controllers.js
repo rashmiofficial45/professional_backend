@@ -6,14 +6,17 @@ import ApiResponse from "../utils/ApiResponse.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
     try {
-        const user = User.findById(userId);
+        const user = await User.findById(userId);
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
-
+           
         user.refreshToken = refreshToken;
         await user.save({ validateBeforeSave: false });
+     
         return { accessToken, refreshToken };
+        
     } catch (error) {
+        console.log(error)
         throw new ApiError(
             500,
             "Something went wrong while generating refresh and access token"
@@ -150,7 +153,7 @@ const logoutUser = asyncHandler(async (req,res)=>{
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:[{refreshToken:undefined}]
+            $set:{refreshToken:undefined}
         },
         {
             new:true
