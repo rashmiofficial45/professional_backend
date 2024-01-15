@@ -20,6 +20,7 @@ export const verifyJwt = asyncHandler(async (req, res, next) => {
         req.user = user
         next()
     } catch (error) {
+        console.log(error)
         throw new ApiError(401,error?.message || "invalid access token")
     }
 });
