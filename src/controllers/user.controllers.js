@@ -232,7 +232,7 @@ const changeCurrentPassword = asyncHandler(async () => {
 const getCurrentUser = asyncHandler(async () => {
     return res
         .status(200)
-        .json(200, req.user, "current user fetched successfully");
+        .json(new ApiResponse(200, {}, "coverImage updated sucessfully"));
 });
 const updateAccountDetails = asyncHandler(async () => {
     const { fullname, email } = req.body;
