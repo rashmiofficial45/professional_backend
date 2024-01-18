@@ -54,8 +54,18 @@ userSchema.pre('save', async function(next) {
 })
 
 userSchema.methods.isPasswordCorrect = async function(password){
-    return await bcryptjs.compare(password,this.password)
-}
+    try {
+        // Check if password is undefined
+        if (!password || !this.password) {
+          return false;
+        }
+        const isMatch = await bcryptjs.compare(password, this.password);
+        return isMatch;
+      } catch (error) {
+        // Handle any errors that might occur during the comparison
+        console.error("Error in password comparison:", error);
+        return false;
+      }}
 
 userSchema.methods.generateAccessToken =  function(){
     return jwt.sign(

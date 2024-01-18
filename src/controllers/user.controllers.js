@@ -216,25 +216,27 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         throw new ApiResponse(401, error?.message || "Invalid refresh token");
     }
 });
-const changeCurrentPassword = asyncHandler(async () => {
+const changeCurrentPassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body;
     const user = await User.findById(req.user?._id);
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
     if (!isPasswordCorrect) {
         throw new ApiError(400, "Invalid password");
     }
+
+    // If password is correct, update the password
     user.password = newPassword;
     await user.save({ validateBeforeSave: false });
     return res
         .status(200)
         .json(new ApiResponse(200, {}, "password changed successfully"));
 });
-const getCurrentUser = asyncHandler(async () => {
-    return res
-        .status(200)
-        .json(new ApiResponse(200, {}, "coverImage updated sucessfully"));
+const getCurrentUser = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user?._id);
+    return res.status(200).json(new ApiResponse(200, user, "got current user"));
 });
-const updateAccountDetails = asyncHandler(async () => {
+const updateAccountDetails = asyncHandler(async (req, res) => {
     const { fullname, email } = req.body;
     if (!(fullname || email)) {
         throw new ApiError(400, "All the fields are required");
@@ -308,6 +310,77 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(200, user, "coverImage updated sucessfully"));
 });
+
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+    const { username } = req.params;
+    if (!username?.trim()) {
+        throw new ApiError(400, "username is missing");
+    }
+    const channel = await User.aggregate([
+        {
+            $match:{
+                username:username?.toLowerCase()
+            }
+        },
+        {
+            $lookup:{
+                from:"subscriptions",
+                localField:"_id",
+                foreignField:"channel",
+                as:"subscribers"
+            }
+        },
+        {
+            $lookup:{
+                from:"subscriptions",
+                localField:"_id",
+                foreignField:"subscriber",
+                as:"subscribedTo"
+            }
+        },
+        {
+            $addFields:{
+                subscriberCount:{
+                    $size:"$subscribers"
+                },
+                channelSubscribedTo:{
+                    $size:"$subscribedTo"
+                },
+                isSubscribed:{
+                    $cond:{
+                        if:{$in:[req.user?._id,"$subscribers.subscriber"]},
+                        then:true,
+                        else:false
+
+                    }
+                    
+                }
+            }
+        },
+        {
+            $project:{
+                fullname:1,
+                username:1,
+                subscriberCount:1,
+                channelSubscribedTo:1,
+                isSubscribed:1,
+                avatar:1,
+                coverImage:1,
+                email:1
+            }
+        }
+    ]);
+    
+    if (!channel?.length) {
+        throw new ApiError(404,"channel doesnot exist")
+    }
+
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, channel[0], "user channel fetched successfully"));
+});
+
 export {
     registerUser,
     loginUser,
@@ -317,5 +390,6 @@ export {
     getCurrentUser,
     updateAccountDetails,
     updateUserAvatar,
-    updateUserCoverImage
+    updateUserCoverImage,
+    getUserChannelProfile,
 };
