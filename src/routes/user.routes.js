@@ -1,5 +1,5 @@
 import {Router} from "express"
-import { loginUser, logoutUser, refreshAccessToken, registerUser ,updateUserAvatar,getCurrentUser ,changeCurrentPassword , updateAccountDetails } from "../controllers/user.controllers.js"
+import { loginUser, logoutUser, refreshAccessToken, registerUser ,updateUserAvatar,getCurrentUser ,changeCurrentPassword , updateAccountDetails, updateUserCoverImage, getUserChannelProfile, getWatchHistory } from "../controllers/user.controllers.js"
 import {upload} from "../middlewares/multer.middlewares.js" 
 import { verifyJwt } from "../middlewares/auth.middleware.js"
 
@@ -22,8 +22,11 @@ router.route("/register").post(
 router.route("/login").post(loginUser)
 router.route("/logout").post(verifyJwt,logoutUser)
 router.route("/refresh-token").post(verifyJwt,refreshAccessToken)
+router.route("/currentuser").get(verifyJwt,getCurrentUser)
 router.route("/change-password").post(verifyJwt,changeCurrentPassword)  //?Still having Error
-router.route("/change-email").post(verifyJwt,updateAccountDetails)
-router.route("/currentuser").post(verifyJwt,getCurrentUser)
-router.route("/updateavatar").post(verifyJwt,updateUserAvatar)
+router.route("/change-email").patch(verifyJwt,updateAccountDetails)
+router.route("/updateavatar").patch(verifyJwt,upload.single("avatar"),updateUserAvatar)
+router.route("/updatecoverimage").patch(verifyJwt,upload.single("coverImage"),updateUserCoverImage)
+router.route("/c/:username").get(verifyJwt,getUserChannelProfile)
+router.route("/history").get(verifyJwt,getWatchHistory)
 export default router
