@@ -1,1 +1,1 @@
-export const DB_NAME="youtube";
+export const DB_NAME="youtube";  //setting the database name in a different file and exporting the document
